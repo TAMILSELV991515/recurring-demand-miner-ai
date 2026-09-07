@@ -1,0 +1,74 @@
+{% extends 'admin_base.html' %}
+{% set active_page = 'admin_recommendations' %}
+{% block page_title %}Permanent Fix Recommendations & ROI Analysis{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="glass-card p-3 d-flex align-items-center justify-content-between">
+            <div>
+                <div class="kpi-title">Total Time Saved Potential</div>
+                <div class="kpi-value text-info">{{ total_time_saved }} Hrs</div>
+                <small class="text-muted"><i class="bi bi-clock me-1"></i> Per Year Support Effort</small>
+            </div>
+            <div class="kpi-icon icon-blue"><i class="bi bi-hourglass-bottom"></i></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card p-3 d-flex align-items-center justify-content-between">
+            <div>
+                <div class="kpi-title">Total Cost Savings Potential</div>
+                <div class="kpi-value text-success">${{ "{:,}".format(total_cost_saved) }}</div>
+                <small class="text-muted"><i class="bi bi-cash-coin me-1"></i> At $50/hr Engineer Rate</small>
+            </div>
+            <div class="kpi-icon icon-green"><i class="bi bi-currency-dollar"></i></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card p-3 d-flex align-items-center justify-content-between">
+            <div>
+                <div class="kpi-title">Average Demand Reduction</div>
+                <div class="kpi-value text-warning">81.5%</div>
+                <small class="text-muted"><i class="bi bi-graph-down me-1"></i> Expected Ticket Elimination</small>
+            </div>
+            <div class="kpi-icon icon-amber"><i class="bi bi-shield-check"></i></div>
+        </div>
+    </div>
+</div>
+
+<div class="glass-card p-4">
+    <h5 class="fw-bold mb-3"><i class="bi bi-lightbulb text-warning me-2"></i> Ranked Problem Management Interventions</h5>
+    <div class="table-responsive">
+        <table class="table table-custom align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Rank / ID</th>
+                    <th>Cluster Name</th>
+                    <th>Priority Score</th>
+                    <th>Recommended Fix</th>
+                    <th>Reduction %</th>
+                    <th>Time Saved</th>
+                    <th>Cost Saved</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in clusters %}
+                <tr>
+                    <td><span class="badge bg-primary rounded-circle me-1">{{ loop.index }}</span> <span class="badge bg-dark border text-info font-monospace">{{ c.cluster_id }}</span></td>
+                    <td class="fw-semibold">{{ c.cluster_name }}</td>
+                    <td><span class="badge bg-danger fs-6 px-3">{{ c.priority_score }}</span></td>
+                    <td><small class="d-inline-block text-truncate" style="max-width: 260px;">{{ c.recommended_fix }}</small></td>
+                    <td><span class="fw-bold text-success">{{ c.expected_ticket_reduction_pct }}%</span></td>
+                    <td><span class="fw-bold text-info">{{ c.time_saved_hours }} Hrs</span></td>
+                    <td><span class="fw-bold text-success">${{ "{:,}".format(c.cost_saved_usd) }}</span></td>
+                    <td><button class="btn btn-sm btn-outline-success rounded-pill" onclick="showToast('Approved!', 'success')">Approve</button></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="8" class="text-center py-4 text-muted">No recommendations available.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

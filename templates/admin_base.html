@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Portal{% endblock %} - Recurring Demand Miner</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <i class="bi bi-shield-lock-fill text-purple fs-3"></i>
+            <span>Admin Suite</span>
+        </div>
+        <div class="px-3 mb-3">
+            <span class="badge bg-purple-subtle text-purple border border-purple-subtle w-100 py-2" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;">
+                <i class="bi bi-person-check-fill me-1"></i> Admin: {{ session.get('admin_username', 'admin') }}
+            </span>
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link {% if active_page == 'admin_dashboard' %}active{% endif %}" href="{{ url_for('admin_dashboard') }}">
+                    <i class="bi bi-grid-1x2-fill"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_page == 'admin_tickets' %}active{% endif %}" href="{{ url_for('admin_tickets') }}">
+                    <i class="bi bi-ticket-detailed-fill"></i> Manage Tickets
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_page == 'admin_users' %}active{% endif %}" href="{{ url_for('admin_users') }}">
+                    <i class="bi bi-people-fill"></i> Manage Users
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_page == 'admin_engineers' %}active{% endif %}" href="{{ url_for('admin_engineers') }}">
+                    <i class="bi bi-person-badge-fill"></i> Manage Engineers
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_page == 'admin_assets' %}active{% endif %}" href="{{ url_for('admin_assets') }}">
+                    <i class="bi bi-laptop-fill"></i> Manage Assets
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_page == 'admin_clusters' %}active{% endif %}" href="{{ url_for('admin_clusters') }}">
+                    <i class="bi bi-diagram-3-fill"></i> Demand Miner
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_page == 'admin_recommendations' %}active{% endif %}" href="{{ url_for('admin_recommendations') }}">
+                    <i class="bi bi-lightbulb-fill"></i> Fix Recommendations
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_page == 'admin_reports' %}active{% endif %}" href="{{ url_for('admin_reports') }}">
+                    <i class="bi bi-file-earmark-pdf-fill"></i> Reports Center
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_page == 'admin_analytics' %}active{% endif %}" href="{{ url_for('admin_analytics') }}">
+                    <i class="bi bi-bar-chart-line-fill"></i> Analytics & ML
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_page == 'admin_settings' %}active{% endif %}" href="{{ url_for('admin_settings') }}">
+                    <i class="bi bi-gear-fill"></i> System Settings
+                </a>
+            </li>
+            <li class="nav-item mt-3">
+                <a class="nav-link text-danger fw-semibold" href="{{ url_for('admin_logout') }}">
+                    <i class="bi bi-box-arrow-right"></i> Logout Admin
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <!-- Top Navbar -->
+        <div class="top-navbar">
+            <div>
+                <h4 class="mb-0 fw-bold">{% block page_title %}Admin Dashboard{% endblock %}</h4>
+                <small class="text-muted">Enterprise Service Desk Problem Management Engine</small>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Light/Dark Theme">
+                    <i class="bi bi-sun-fill" id="themeIcon"></i>
+                </button>
+                <a href="{{ url_for('admin_logout') }}" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                    <i class="bi bi-box-arrow-right me-1"></i> Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Toast Container -->
+        <div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100;"></div>
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Bootstrap 5 & Chart.js Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+{% set active_page = 'tickets' %}
+{% block page_title %}Ticket Management{% endblock %}
+
+{% block content %}
+<div class="glass-card p-4 mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <!-- Search & Filter Controls -->
+        <form class="d-flex gap-2 flex-grow-1" method="GET" action="{{ url_for('tickets_view') }}">
+            <div class="input-group">
+                <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-search"></i></span>
+                <input type="text" class="form-control bg-dark text-white border-secondary" name="search" placeholder="Search by Ticket ID, Title, Asset or Description..." value="{{ search_query }}">
+            </div>
+            <select class="form-select bg-dark text-white border-secondary w-auto" name="category">
+                <option value="">All Categories</option>
+                {% for cat in ['Hardware', 'Application', 'Access', 'Network', 'Server', 'Facilities'] %}
+                <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+                {% endfor %}
+            </select>
+            <select class="form-select bg-dark text-white border-secondary w-auto" name="status">
+                <option value="">All Statuses</option>
+                <option value="Closed" {% if selected_status == 'Closed' %}selected{% endif %}>Closed</option>
+                <option value="Resolved" {% if selected_status == 'Resolved' %}selected{% endif %}>Resolved</option>
+                <option value="Open" {% if selected_status == 'Open' %}selected{% endif %}>Open</option>
+            </select>
+            <button type="submit" class="btn btn-primary px-3"><i class="bi bi-filter"></i> Filter</button>
+            {% if search_query or selected_category or selected_status %}
+            <a href="{{ url_for('tickets_view') }}" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i> Clear</a>
+            {% endif %}
+        </form>
+
+        <!-- Action Buttons -->
+        <div class="d-flex gap-2">
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addTicketModal">
+                <i class="bi bi-plus-lg me-1"></i> Add Ticket
+            </button>
+            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#importCsvModal">
+                <i class="bi bi-file-earmark-arrow-up me-1"></i> Import CSV
+            </button>
+            <a href="{{ url_for('export_tickets_csv') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-file-earmark-arrow-down me-1"></i> Export CSV
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Tickets Data Table -->
+<div class="glass-card p-4">
+    <div class="table-responsive">
+        <table class="table table-custom align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Ticket ID</th>
+                    <th>Created Date</th>
+                    <th>Category</th>
+                    <th>Priority</th>
+                    <th>Source</th>
+                    <th>Description</th>
+                    <th>Asset</th>
+                    <th>Engineer</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tickets %}
+                <tr>
+                    <td><a href="{{ url_for('ticket_detail_view', ticket_id=t.ticket_id) }}" class="fw-bold font-monospace text-primary text-decoration-none">{{ t.ticket_id }}</a></td>
+                    <td><small class="text-muted">{{ t.created_date }}</small></td>
+                    <td><span class="badge bg-secondary-subtle text-secondary">{{ t.category }}</span></td>
+                    <td>
+                        {% if t.priority == 'P1-Critical' %}<span class="badge badge-p1">P1 Critical</span>
+                        {% elif t.priority == 'P2-High' %}<span class="badge badge-p2">P2 High</span>
+                        {% elif t.priority == 'P3-Medium' %}<span class="badge badge-p3">P3 Medium</span>
+                        {% else %}<span class="badge badge-p4">P4 Low</span>{% endif %}
+                    </td>
+                    <td><small>{{ t.channel }}</small></td>
+                    <td><span class="d-inline-block text-truncate" style="max-width: 260px;" title="{{ t.short_description }}">{{ t.short_description }}</span></td>
+                    <td><small class="font-monospace text-info">{{ t.affected_asset }}</small></td>
+                    <td><small>{{ t.assigned_engineer }}</small></td>
+                    <td>
+                        {% if t.status == 'Closed' %}<span class="badge bg-success-subtle text-success">Closed</span>
+                        {% elif t.status == 'Resolved' %}<span class="badge bg-info-subtle text-info">Resolved</span>
+                        {% else %}<span class="badge bg-warning-subtle text-warning">Open</span>{% endif %}
+                    </td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <a href="{{ url_for('ticket_detail_view', ticket_id=t.ticket_id) }}" class="btn btn-outline-info" title="View Details"><i class="bi bi-eye"></i></a>
+                            <button class="btn btn-outline-danger" onclick="deleteTicket('{{ t.ticket_id }}')" title="Delete Ticket"><i class="bi bi-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="10" class="text-center py-4 text-muted">No tickets found matching current search criteria.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top border-secondary">
+        <small class="text-muted">Showing {{ tickets|length }} of {{ total_count }} tickets</small>
+        <nav>
+            <ul class="pagination pagination-sm mb-0">
+                {% for p in range(1, total_pages + 1) %}
+                {% if p <= 10 or p == total_pages or (p >= current_page - 2 and p <= current_page + 2) %}
+                <li class="page-item {% if p == current_page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('tickets_view', page=p, search=search_query, category=selected_category, status=selected_status) }}">{{ p }}</a>
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<!-- Add Ticket Modal -->
+<div class="modal fade" id="addTicketModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title"><i class="bi bi-plus-circle text-primary me-2"></i> Log New Support Ticket</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('add_ticket_api') }}" method="POST">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Category</label>
+                            <select class="form-select bg-dark text-white border-secondary" name="category" required>
+                                <option value="Hardware">Hardware</option>
+                                <option value="Application">Application</option>
+                                <option value="Access">Access</option>
+                                <option value="Network">Network</option>
+                                <option value="Server">Server</option>
+                                <option value="Facilities">Facilities</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Priority</label>
+                            <select class="form-select bg-dark text-white border-secondary" name="priority" required>
+                                <option value="P3-Medium">P3-Medium</option>
+                                <option value="P1-Critical">P1-Critical</option>
+                                <option value="P2-High">P2-High</option>
+                                <option value="P4-Low">P4-Low</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Source Channel</label>
+                            <select class="form-select bg-dark text-white border-secondary" name="channel" required>
+                                <option value="Portal">Portal</option>
+                                <option value="Email">Email</option>
+                                <option value="Chat">Chat</option>
+                                <option value="Phone">Phone</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Affected Asset</label>
+                            <input type="text" class="form-control bg-dark text-white border-secondary" name="affected_asset" placeholder="e.g. EUC-FLEET or PRT-01" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Short Description / Issue Summary</label>
+                            <textarea class="form-control bg-dark text-white border-secondary" name="short_description" rows="3" placeholder="Describe the incident..." required></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Assigned Engineer</label>
+                            <input type="text" class="form-control bg-dark text-white border-secondary" name="assigned_engineer" value="Alex Mercer">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Workaround Used?</label>
+                            <select class="form-select bg-dark text-white border-secondary" name="is_workaround">
+                                <option value="0">No (Root cause resolved)</option>
+                                <option value="1">Yes (Temporary workaround applied)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i> Save Ticket</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Import CSV Modal -->
+<div class="modal fade" id="importCsvModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title"><i class="bi bi-file-earmark-arrow-up text-primary me-2"></i> Import CSV Tickets Dataset</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('import_tickets_csv') }}" method="POST" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <p class="text-muted small">Upload a valid Service Desk Tickets CSV file containing ticket headers.</p>
+                    <div class="mb-3">
+                        <label class="form-label">Select CSV File</label>
+                        <input type="file" class="form-control bg-dark text-white border-secondary" name="csv_file" accept=".csv" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-upload me-1"></i> Start Import</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function deleteTicket(ticketId) {
+    if (confirm(`Are you sure you want to delete ticket ${ticketId}?`)) {
+        fetch(`/api/tickets/${ticketId}`, { method: 'DELETE' })
+            .then(res => res.json())
+            .then(data => {
+                showToast(data.message, 'success');
+                setTimeout(() => location.reload(), 1000);
+            });
+    }
+}
+</script>
+{% endblock %}

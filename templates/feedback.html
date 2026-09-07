@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% set active_page = 'feedback' %}
+{% block page_title %}Stakeholder Validation & Manager Feedback{% endblock %}
+
+{% block content %}
+<!-- Top Metrics Row -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="glass-card p-3 d-flex align-items-center justify-content-between">
+            <div>
+                <div class="kpi-title">Average Satisfaction</div>
+                <div class="kpi-value text-warning">{{ avg_rating }} / 5.0</div>
+                <small class="text-muted"><i class="bi bi-star-fill text-warning me-1"></i> Based on {{ total_reviews }} Reviews</small>
+            </div>
+            <div class="kpi-icon icon-amber"><i class="bi bi-star-fill"></i></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card p-3 d-flex align-items-center justify-content-between">
+            <div>
+                <div class="kpi-title">Fix Approval Rate</div>
+                <div class="kpi-value text-success">{{ approval_pct }}%</div>
+                <small class="text-muted"><i class="bi bi-hand-thumbs-up me-1"></i> Service Manager Approvals</small>
+            </div>
+            <div class="kpi-icon icon-green"><i class="bi bi-check-circle-fill"></i></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card p-3 d-flex align-items-center justify-content-between">
+            <div>
+                <div class="kpi-title">Recommendation Utility</div>
+                <div class="kpi-value text-info">{{ utility_pct }}%</div>
+                <small class="text-muted"><i class="bi bi-lightbulb me-1"></i> Actionable Solutions</small>
+            </div>
+            <div class="kpi-icon icon-blue"><i class="bi bi-lightbulb-fill"></i></div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Submit Feedback Form Card -->
+    <div class="col-lg-5">
+        <div class="glass-card p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-chat-square-text text-primary me-2"></i> Submit Service Manager Evaluation</h5>
+            <form action="{{ url_for('submit_feedback_api') }}" method="POST">
+                <div class="mb-3">
+                    <label class="form-label">Service Manager Name</label>
+                    <input type="text" class="form-control bg-dark text-white border-secondary" name="manager_name" placeholder="e.g. David Ross (Service Desk Manager)" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Target Cluster ID</label>
+                    <select class="form-select bg-dark text-white border-secondary" name="cluster_id">
+                        <option value="CL-PRINT-SPOOL-02">CL-PRINT-SPOOL-02 (Hardware: Print Spooler)</option>
+                        <option value="CL-ERP-BATCH-FAIL-02">CL-ERP-BATCH-FAIL-02 (Application: ERP Batch)</option>
+                        <option value="CL-EMAIL-QUOTA-03">CL-EMAIL-QUOTA-03 (Application: Email Quota)</option>
+                        <option value="CL-VPN-AUTH-01">CL-VPN-AUTH-01 (Network: VPN Auth)</option>
+                        <option value="CL-BATTERY-DRAIN-04">CL-BATTERY-DRAIN-04 (Hardware: Battery Drain)</option>
+                        <option value="CL-SSO-TOKEN-EXPIRE">CL-SSO-TOKEN-EXPIRE (Access: Okta SSO)</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label d-block">1. Was the recurring issue identified correctly?</label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="issue_correct" value="1" id="correctYes" checked>
+                        <label class="form-check-label" for="correctYes">Yes</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="issue_correct" value="0" id="correctNo">
+                        <label class="form-check-label" for="correctNo">No</label>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label d-block">2. Was the permanent fix recommendation useful?</label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="recommendation_useful" value="1" id="usefulYes" checked>
+                        <label class="form-check-label" for="usefulYes">Yes</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="recommendation_useful" value="0" id="usefulNo">
+                        <label class="form-check-label" for="usefulNo">No</label>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label d-block">3. Would you approve this permanent fix for rollout?</label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="approve_fix" value="1" id="approveYes" checked>
+                        <label class="form-check-label" for="approveYes">Yes (Approve)</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="approve_fix" value="0" id="approveNo">
+                        <label class="form-check-label" for="approveNo">No (Reject)</label>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Overall System Satisfaction Rating (1 to 5 Stars)</label>
+                    <select class="form-select bg-dark text-white border-secondary" name="satisfaction_rating">
+                        <option value="5">⭐⭐⭐⭐⭐ 5 - Excellent Accuracy & Value</option>
+                        <option value="4">⭐⭐⭐⭐ 4 - Good Performance</option>
+                        <option value="3">⭐⭐⭐ 3 - Satisfactory</option>
+                        <option value="2">⭐⭐ 2 - Needs Improvement</option>
+                        <option value="1">⭐ 1 - Unsatisfactory</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Comments / Manager Feedback</label>
+                    <textarea class="form-control bg-dark text-white border-secondary" name="comments" rows="2" placeholder="Optional comments or suggestions..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 fw-bold"><i class="bi bg-send me-1"></i> Submit Feedback</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Manager Feedback Reviews List Card -->
+    <div class="col-lg-7">
+        <div class="glass-card p-4 h-100">
+            <h5 class="fw-bold mb-3"><i class="bi bi-journals text-purple me-2"></i> Service Manager Review Audit Trail</h5>
+            <div class="table-responsive">
+                <table class="table table-custom align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Manager</th>
+                            <th>Cluster</th>
+                            <th>Accurate?</th>
+                            <th>Approved?</th>
+                            <th>Rating</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for fb in feedback_list %}
+                        <tr>
+                            <td><small class="text-muted font-monospace">{{ fb.created_at[:10] }}</small></td>
+                            <td class="fw-bold">{{ fb.manager_name }}</td>
+                            <td><span class="badge bg-dark border text-info font-monospace">{{ fb.cluster_id }}</span></td>
+                            <td>{% if fb.issue_correct %}<span class="badge bg-success-subtle text-success">Yes</span>{% else %}<span class="badge bg-danger-subtle text-danger">No</span>{% endif %}</td>
+                            <td>{% if fb.approve_fix %}<span class="badge bg-success-subtle text-success">Approved</span>{% else %}<span class="badge bg-secondary-subtle text-secondary">Pending</span>{% endif %}</td>
+                            <td><span class="text-warning font-monospace">★ {{ fb.satisfaction_rating }}.0</span></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">No manager reviews logged yet. Submit feedback using the form on the left.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

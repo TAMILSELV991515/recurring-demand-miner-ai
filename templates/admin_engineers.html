@@ -1,0 +1,94 @@
+{% extends 'admin_base.html' %}
+{% set active_page = 'admin_engineers' %}
+{% block page_title %}Manage Support Engineers{% endblock %}
+
+{% block content %}
+<div class="glass-card p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="fw-bold mb-1"><i class="bi bi-people text-purple me-2"></i> Service Desk Engineer Directory</h5>
+            <small class="text-muted">Manage support engineering teams, resolver groups, and workload distribution.</small>
+        </div>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEngineerModal">
+            <i class="bi bi-person-plus-fill me-1"></i> Add Engineer
+        </button>
+    </div>
+</div>
+
+<div class="glass-card p-4">
+    <div class="table-responsive">
+        <table class="table table-custom align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Engineer Name</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Resolver Team</th>
+                    <th>Active Workload</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for e in engineers %}
+                <tr>
+                    <td class="fw-bold text-white"><i class="bi bi-person-circle text-primary me-2"></i> {{ e.name }}</td>
+                    <td><small class="text-muted">{{ e.email }}</small></td>
+                    <td><span class="badge bg-secondary-subtle text-secondary">{{ e.department }}</span></td>
+                    <td><small class="fw-semibold">{{ e.resolver_team }}</small></td>
+                    <td>
+                        <span class="badge bg-info-subtle text-info fs-6 px-3 py-1">{{ e.active_tickets }} Tickets</span>
+                    </td>
+                    <td><span class="badge bg-success-subtle text-success">Active</span></td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-muted">No engineers added.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Engineer Modal -->
+<div class="modal fade" id="addEngineerModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title"><i class="bi bi-person-plus text-purple me-2"></i> Add Support Engineer</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('admin_add_engineer') }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Engineer Name</label>
+                        <input type="text" class="form-control bg-dark text-white border-secondary" name="name" placeholder="e.g. John Smith" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control bg-dark text-white border-secondary" name="email" placeholder="john.smith@company.com" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Department</label>
+                        <input type="text" class="form-control bg-dark text-white border-secondary" name="department" placeholder="e.g. End User Compute, Applications" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Resolver Team</label>
+                        <select class="form-select bg-dark text-white border-secondary" name="resolver_team">
+                            <option value="Field Support">Field Support</option>
+                            <option value="App Support">App Support</option>
+                            <option value="Identity & Access">Identity & Access</option>
+                            <option value="Network Ops">Network Ops</option>
+                            <option value="Server Ops">Server Ops</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Engineer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

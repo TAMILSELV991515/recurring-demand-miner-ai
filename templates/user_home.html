@@ -1,0 +1,140 @@
+{% extends 'user_base.html' %}
+{% set active_page = 'home' %}
+{% block title %}Home - IT Support Portal{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="user-hero">
+    <div class="container">
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill mb-3">
+            <i class="bi bi-cpu-fill me-1"></i> AI-Powered Support Assistant
+        </span>
+        <h1 class="display-5 fw-bold text-white mb-3">How can we help you today?</h1>
+        <p class="lead text-muted mx-auto mb-4" style="max-width: 650px;">
+            Submit an IT ticket, search automated solutions, or track your existing support requests instantly.
+        </p>
+
+        <!-- Quick Ticket Search Bar -->
+        <form action="{{ url_for('user_tickets') }}" method="GET" class="d-flex justify-content-center mx-auto" style="max-width: 600px;">
+            <div class="input-group input-group-lg shadow-lg">
+                <span class="input-group-text bg-dark text-muted border-secondary"><i class="bi bi-search"></i></span>
+                <input type="text" class="form-control bg-dark text-white border-secondary fs-6" name="search" placeholder="Search issue (e.g., VPN disconnect, Printer spooler, Email quota)...">
+                <button type="submit" class="btn btn-primary px-4 fw-semibold">Search AI Fixes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Main Body -->
+<div class="container my-5">
+    <div class="row g-4">
+        <!-- Submit Ticket Card -->
+        <div class="col-lg-7">
+            <div class="glass-card p-4 h-100">
+                <h4 class="fw-bold mb-3"><i class="bi bi-plus-circle text-primary me-2"></i> Submit New Support Request</h4>
+                <p class="text-muted small mb-4">Fill out the form below to log an IT incident with our Service Desk.</p>
+
+                <form action="{{ url_for('user_submit_ticket') }}" method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Category</label>
+                            <select class="form-select bg-dark text-white border-secondary" name="category" required>
+                                <option value="Application">Application</option>
+                                <option value="Hardware">Hardware</option>
+                                <option value="Access">Access / Account</option>
+                                <option value="Network">Network / VPN</option>
+                                <option value="Server">Server</option>
+                                <option value="Facilities">Facilities</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Priority</label>
+                            <select class="form-select bg-dark text-white border-secondary" name="priority">
+                                <option value="P3-Medium">P3 - Medium (Standard Request)</option>
+                                <option value="P2-High">P2 - High (Significant Impact)</option>
+                                <option value="P1-Critical">P1 - Critical (Work Stopped)</option>
+                                <option value="P4-Low">P4 - Low (Minor Request)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Intake Channel</label>
+                            <select class="form-select bg-dark text-white border-secondary" name="channel">
+                                <option value="Portal">Web Portal</option>
+                                <option value="Email">Email</option>
+                                <option value="Chat">Chat</option>
+                                <option value="Phone">Phone</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Affected Asset ID / Hostname</label>
+                            <input type="text" class="form-control bg-dark text-white border-secondary" name="affected_asset" placeholder="e.g. EUC-DESK-102 or PRT-01" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Issue Summary / Description</label>
+                            <textarea class="form-control bg-dark text-white border-secondary" name="short_description" rows="3" placeholder="Describe what issue or error message you are experiencing..." required></textarea>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold shadow"><i class="bi bi-send-fill me-2"></i> Submit Ticket</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Quick AI Recommended Solutions Card -->
+        <div class="col-lg-5">
+            <div class="glass-card p-4 h-100">
+                <h4 class="fw-bold mb-3"><i class="bi bi-lightbulb text-warning me-2"></i> Immediate AI Solutions</h4>
+                <p class="text-muted small mb-4">Common automated resolution steps for frequent IT requests:</p>
+
+                <div class="accordion" id="aiSolutionsAccordion">
+                    <div class="accordion-item bg-dark border-secondary">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button bg-dark text-white collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sol1">
+                                <i class="bi bi-printer text-info me-2"></i> Printer Spooler Jobs Frozen
+                            </button>
+                        </h2>
+                        <div id="sol1" class="accordion-collapse collapse" data-bs-parent="#aiSolutionsAccordion">
+                            <div class="accordion-body text-muted small">
+                                Clear pending spool queue by restarting the Windows Print Spooler service via Command Prompt: <code>net stop spooler && net start spooler</code>.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item bg-dark border-secondary mt-2">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button bg-dark text-white collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sol2">
+                                <i class="bi bi-shield-lock text-purple me-2"></i> VPN Disconnects / MFA Radius
+                            </button>
+                        </h2>
+                        <div id="sol2" class="accordion-collapse collapse" data-bs-parent="#aiSolutionsAccordion">
+                            <div class="accordion-body text-muted small">
+                                Open GlobalProtect client settings, click <strong>Refresh Connection</strong>, clear browser cookies, and re-authenticate token.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item bg-dark border-secondary mt-2">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button bg-dark text-white collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sol3">
+                                <i class="bi bi-envelope-exclamation text-danger me-2"></i> Mailbox Over Quota Block
+                            </button>
+                        </h2>
+                        <div id="sol3" class="accordion-collapse collapse" data-bs-parent="#aiSolutionsAccordion">
+                            <div class="accordion-body text-muted small">
+                                Archive attachments larger than 10MB to OneDrive or run Outlook Archive. Quotas auto-expand once usage drops under 90%.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 p-3 bg-primary-subtle border border-primary-subtle rounded text-center">
+                    <i class="bi bi-search text-primary fs-4 d-block mb-1"></i>
+                    <small class="text-white d-block mb-2">Need to track an existing request?</small>
+                    <a href="{{ url_for('user_track') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">Track Ticket Status</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

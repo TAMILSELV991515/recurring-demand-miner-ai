@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% set active_page = 'miner' %}
+{% block page_title %}Recurring Demand Miner Engine{% endblock %}
+
+{% block content %}
+<!-- Controls & Algorithm Config Card -->
+<div class="glass-card p-4 mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+            <h5 class="fw-bold mb-1"><i class="bi bi-diagram-3 text-primary me-2"></i> NLP & Machine Learning Cluster Config</h5>
+            <small class="text-muted">Extract semantic ticket clusters, calculate recurrence intervals, effort, and repeated workaround usage.</small>
+        </div>
+        <form class="d-flex gap-2 align-items-center" id="minerForm">
+            <select class="form-select bg-dark text-white border-secondary" name="algorithm" id="algoSelect">
+                <option value="KMeans">KMeans Clustering (TF-IDF)</option>
+                <option value="DBSCAN">DBSCAN Density Clustering</option>
+            </select>
+            <input type="number" class="form-control bg-dark text-white border-secondary w-auto" name="n_clusters" id="clustersInput" value="8" min="3" max="20" title="Number of clusters (K)">
+            <button type="submit" class="btn btn-primary text-nowrap px-3" id="runMinerBtn">
+                <i class="bi bi-play-fill me-1"></i> Run Demand Mining
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Mined Clusters Display Container -->
+<div id="clustersContainer" class="row g-4">
+    {% for c in clusters %}
+    <div class="col-lg-6">
+        <div class="glass-card p-4 h-100 position-relative">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                    <span class="badge bg-dark border text-info font-monospace fs-6 mb-1">{{ c.cluster_id }}</span>
+                    <span class="badge bg-secondary-subtle text-secondary ms-2">{{ c.category }}</span>
+                    <h5 class="fw-bold text-white mt-1 mb-1">{{ c.cluster_name }}</h5>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-primary fs-6 px-3 py-2">Score: {{ c.priority_score }}</span>
+                </div>
+            </div>
+            
+            <p class="text-muted small mb-3"><em>"{{ c.issue_description }}"</em></p>
+
+            <div class="row g-2 mb-3 bg-dark p-3 rounded border border-secondary text-center">
+                <div class="col-4 border-end border-secondary">
+                    <small class="text-muted d-block">Ticket Frequency</small>
+                    <span class="fw-bold fs-5 text-white">{{ c.ticket_count }} Incidents</span>
+                </div>
+                <div class="col-4 border-end border-secondary">
+                    <small class="text-muted d-block">Recurrence Interval</small>
+                    <span class="fw-bold fs-5 text-warning">{{ c.recurrence_interval_days }} Days</span>
+                </div>
+                <div class="col-4">
+                    <small class="text-muted d-block">Total Effort</small>
+                    <span class="fw-bold fs-5 text-info">{{ c.total_effort_hours }} Hrs</span>
+                </div>
+            </div>
+
+            <div class="row g-2 small mb-3 text-muted">
+                <div class="col-md-6"><i class="bi bi-laptop me-1"></i> Affected Assets: <strong class="text-white">{{ c.affected_assets }}</strong></div>
+                <div class="col-md-6"><i class="bi bi-arrow-repeat me-1"></i> Workaround Usage: <strong class="text-warning">{{ c.workaround_freq_pct }}%</strong></div>
+                <div class="col-md-6"><i class="bi bi-clock-history me-1"></i> Avg Resolution Time: <strong class="text-white">{{ c.avg_resolution_time_hrs }} hrs</strong></div>
+                <div class="col-md-6"><i class="bi bi-shield-check me-1"></i> Similarity Confidence: <strong class="text-success">{{ c.confidence_score }}%</strong></div>
+            </div>
+
+            <div class="p-3 bg-primary-subtle border border-primary-subtle rounded">
+                <small class="fw-bold text-primary d-block mb-1"><i class="bi bi-lightbulb-fill me-1"></i> Recommended Permanent Fix (Problem Management):</small>
+                <small class="text-white">{{ c.recommended_fix }}</small>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center py-5 text-muted">
+        <i class="bi bi-cpu fs-1 d-block mb-3"></i>
+        <p>No clusters loaded yet. Click <strong>Run Demand Mining</strong> above to analyze tickets.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('minerForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('runMinerBtn');
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Mining...`;
+
+    const algo = document.getElementById('algoSelect').value;
+    const k = document.getElementById('clustersInput').value;
+
+    fetch('/api/miner/cluster', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ algorithm: algo, n_clusters: parseInt(k) })
+    })
+    .then(res => res.json())
+    .then(data => {
+        showToast(`Mined ${data.clusters.length} recurring incident clusters using ${algo}`, 'success');
+        setTimeout(() => location.reload(), 800);
+    })
+    .catch(err => {
+        showToast('Error executing ML clustering', 'danger');
+        btn.disabled = false;
+        btn.innerHTML = `<i class="bi bi-play-fill me-1"></i> Run Demand Mining`;
+    });
+});
+</script>
+{% endblock %}

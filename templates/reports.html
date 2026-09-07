@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% set active_page = 'reports' %}
+{% block page_title %}Downloadable Executive Reports{% endblock %}
+
+{% block content %}
+<div class="glass-card p-4 mb-4">
+    <h5 class="fw-bold mb-1"><i class="bi bi-file-earmark-pdf text-danger me-2"></i> Problem Management Reports & Analytics Center</h5>
+    <small class="text-muted">Export production-ready executive PDF and structured CSV reports for Service Managers, CIOs, and Engineering leads.</small>
+</div>
+
+<div class="row g-4">
+    <!-- Report Card 1 -->
+    <div class="col-md-6 col-lg-4">
+        <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center mb-3">
+                    <div class="kpi-icon icon-rose me-3"><i class="bi bi-diagram-3-fill"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-0">1. Recurring Incident Report</h6>
+                        <small class="text-muted">Mined clusters & recurrence intervals</small>
+                    </div>
+                </div>
+                <p class="small text-muted">Includes ticket frequencies, recurrence intervals (days), workaround percentages, and confidence scores across identified incident clusters.</p>
+            </div>
+            <div class="d-flex gap-2 mt-3 pt-3 border-top border-secondary">
+                <a href="{{ url_for('export_reports_api', report_type='recurring_incidents', report_format='pdf') }}" class="btn btn-sm btn-outline-danger flex-grow-1"><i class="bi bi-file-earmark-pdf me-1"></i> PDF Export</a>
+                <a href="{{ url_for('export_reports_api', report_type='recurring_incidents', report_format='csv') }}" class="btn btn-sm btn-outline-primary flex-grow-1"><i class="bi bi-file-earmark-excel me-1"></i> CSV Export</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Card 2 -->
+    <div class="col-md-6 col-lg-4">
+        <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center mb-3">
+                    <div class="kpi-icon icon-amber me-3"><i class="bi bi-calendar3"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-0">2. Monthly Analysis Report</h6>
+                        <small class="text-muted">Monthly ticket volume & channel trends</small>
+                    </div>
+                </div>
+                <p class="small text-muted">Comprehensive monthly audit of support demand across Email, Chat, Phone, and Portal intake channels.</p>
+            </div>
+            <div class="d-flex gap-2 mt-3 pt-3 border-top border-secondary">
+                <a href="{{ url_for('export_reports_api', report_type='monthly_analysis', report_format='pdf') }}" class="btn btn-sm btn-outline-danger flex-grow-1"><i class="bi bi-file-earmark-pdf me-1"></i> PDF Export</a>
+                <a href="{{ url_for('export_reports_api', report_type='monthly_analysis', report_format='csv') }}" class="btn btn-sm btn-outline-primary flex-grow-1"><i class="bi bi-file-earmark-excel me-1"></i> CSV Export</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Card 3 -->
+    <div class="col-md-6 col-lg-4">
+        <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center mb-3">
+                    <div class="kpi-icon icon-green me-3"><i class="bi bi-lightbulb-fill"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-0">3. Permanent Fix Recommendation</h6>
+                        <small class="text-muted">Problem management strategy</small>
+                    </div>
+                </div>
+                <p class="small text-muted">Engineering intervention strategies sorted by Priority Score, expected demand reduction %, and time saved.</p>
+            </div>
+            <div class="d-flex gap-2 mt-3 pt-3 border-top border-secondary">
+                <a href="{{ url_for('export_reports_api', report_type='permanent_fixes', report_format='pdf') }}" class="btn btn-sm btn-outline-danger flex-grow-1"><i class="bi bi-file-earmark-pdf me-1"></i> PDF Export</a>
+                <a href="{{ url_for('export_reports_api', report_type='permanent_fixes', report_format='csv') }}" class="btn btn-sm btn-outline-primary flex-grow-1"><i class="bi bi-file-earmark-excel me-1"></i> CSV Export</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Card 4 -->
+    <div class="col-md-6 col-lg-4">
+        <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center mb-3">
+                    <div class="kpi-icon icon-blue me-3"><i class="bi bi-laptop-fill"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-0">4. Asset Impact Report</h6>
+                        <small class="text-muted">Fleet vulnerability & hardware breakdown</small>
+                    </div>
+                </div>
+                <p class="small text-muted">Analysis of hardware devices, application servers, and network gateways generating the highest support friction.</p>
+            </div>
+            <div class="d-flex gap-2 mt-3 pt-3 border-top border-secondary">
+                <a href="{{ url_for('export_reports_api', report_type='asset_impact', report_format='pdf') }}" class="btn btn-sm btn-outline-danger flex-grow-1"><i class="bi bi-file-earmark-pdf me-1"></i> PDF Export</a>
+                <a href="{{ url_for('export_reports_api', report_type='asset_impact', report_format='csv') }}" class="btn btn-sm btn-outline-primary flex-grow-1"><i class="bi bi-file-earmark-excel me-1"></i> CSV Export</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Card 5 -->
+    <div class="col-md-6 col-lg-4">
+        <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center mb-3">
+                    <div class="kpi-icon icon-purple me-3"><i class="bi bi-people-fill"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-0">5. Engineer Performance Report</h6>
+                        <small class="text-muted">Resolution metrics & support effort</small>
+                    </div>
+                </div>
+                <p class="small text-muted">Audit of support hours expended per engineer, department workloads, and workaround application frequency.</p>
+            </div>
+            <div class="d-flex gap-2 mt-3 pt-3 border-top border-secondary">
+                <a href="{{ url_for('export_reports_api', report_type='engineer_performance', report_format='pdf') }}" class="btn btn-sm btn-outline-danger flex-grow-1"><i class="bi bi-file-earmark-pdf me-1"></i> PDF Export</a>
+                <a href="{{ url_for('export_reports_api', report_type='engineer_performance', report_format='csv') }}" class="btn btn-sm btn-outline-primary flex-grow-1"><i class="bi bi-file-earmark-excel me-1"></i> CSV Export</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Card 6 -->
+    <div class="col-md-6 col-lg-4">
+        <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center mb-3">
+                    <div class="kpi-icon icon-green me-3"><i class="bi bi-currency-dollar"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-0">6. Cost Savings & ROI Report</h6>
+                        <small class="text-muted">Financial impact & labor savings</small>
+                    </div>
+                </div>
+                <p class="small text-muted">Quantifies total support labor cost saved ($) through demand reduction at standard enterprise engineer hourly rates.</p>
+            </div>
+            <div class="d-flex gap-2 mt-3 pt-3 border-top border-secondary">
+                <a href="{{ url_for('export_reports_api', report_type='cost_savings', report_format='pdf') }}" class="btn btn-sm btn-outline-danger flex-grow-1"><i class="bi bi-file-earmark-pdf me-1"></i> PDF Export</a>
+                <a href="{{ url_for('export_reports_api', report_type='cost_savings', report_format='csv') }}" class="btn btn-sm btn-outline-primary flex-grow-1"><i class="bi bi-file-earmark-excel me-1"></i> CSV Export</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

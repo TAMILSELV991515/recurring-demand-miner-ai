@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% set active_page = 'docs' %}
+{% block page_title %}Documentation & Technical Artifacts{% endblock %}
+
+{% block content %}
+<div class="glass-card p-4 mb-4">
+    <!-- Documentation Tabs -->
+    <ul class="nav nav-pills gap-2 mb-3" id="docTabs" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#archTab"><i class="bi bi-diagram-3 me-1"></i> Architecture & Flow</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#erTab"><i class="bi bi-database me-1"></i> ER Diagram & Schema</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#apiTab"><i class="bi bi-code-slash me-1"></i> API Documentation</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#userTab"><i class="bi bi-book me-1"></i> User Manual</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#slidesTab"><i class="bi bi-file-slides me-1"></i> Presentation Deck</button>
+        </li>
+    </ul>
+
+    <!-- Tab Contents -->
+    <div class="tab-content pt-3 border-top border-secondary" id="docTabContent">
+        
+        <!-- Tab 1: Architecture -->
+        <div class="tab-pane fade show active" id="archTab">
+            <h5 class="fw-bold mb-3"><i class="bi bi-cpu text-primary me-2"></i> System Architecture & Pipeline Flowchart</h5>
+            <div class="p-3 bg-dark rounded font-monospace small mb-3 border border-secondary text-info">
+<pre class="mb-0">
++-----------------------------------------------------------------------------------+
+|                                   USER INTERFACE                                  |
+|          Bootstrap 5 Dashboard / Modern Glassmorphism Admin Interface             |
+|    - Real-time Trend Charts (Chart.js)       - Ticket Management & CSV Import/Export|
+|    - ML Clustering Playground & Benchmarks   - Coexistence Mode & Rollback Demo   |
+|    - Stakeholder Feedback & Manager Approval - Downloadable Reports (PDF / CSV)   |
++------------------------------------------+----------------------------------------+
+                                           | HTTP / REST API (JSON)
+                                           v
++-----------------------------------------------------------------------------------+
+|                                 FLASK REST API CORE                               |
+|  app.py Routing Engine, Controller Endpoints & Middleware State Manager          |
++---------------+--------------------------+------------------------+---------------+
+                |                          |                        |
+                v                          v                        v
++---------------+----------+  +------------+------------+  +--------+---------------+
+|     DATABASE LAYER       |  |     ML ENGINE LAYER     |  |   REPORT & EXPORT     |
+|   (database.py)          |  |  (ml_engine/)           |  |   (reports/)          |
+| - SQLite Database        |  | - TF-IDF Vectorizer     |  | - PDF Generator       |
+| - Tickets & Clusters     |  | - KMeans & DBSCAN       |  |   (ReportLab)         |
+| - Stakeholder Feedback   |  | - Cosine Similarity     |  | - CSV Export Engine   |
+| - System Workflow Config |  | - Fix Recommender (ROI) |  |                       |
+| - Edge Case Logs         |  | - Benchmark Evaluator   |  |                       |
++--------------------------+  +-------------------------+  +-----------------------+
+</pre>
+            </div>
+            <p class="text-muted">The system uses TF-IDF text vectorization combined with KMeans and DBSCAN clustering algorithms to cluster 5,000+ support tickets into recurring incident patterns and rank recommended solutions.</p>
+        </div>
+
+        <!-- Tab 2: ER Diagram -->
+        <div class="tab-pane fade" id="erTab">
+            <h5 class="fw-bold mb-3"><i class="bi bi-database text-purple me-2"></i> Entity Relationship Diagram</h5>
+            <div class="p-3 bg-dark rounded font-monospace small mb-3 border border-secondary text-warning">
+<pre class="mb-0">
+ +------------------------+               +--------------------------+
+ |        TICKETS         |               |         CLUSTERS         |
+ +------------------------+               +--------------------------+
+ | ticket_id (PK)         |               | cluster_id (PK)          |
+ | created_date           |               | cluster_name             |
+ | channel                | 0..*      1   | category                 |
+ | category               | ------------> | ticket_count             |
+ | short_description      |               | total_effort_hours       |
+ | affected_asset         |               | recurrence_interval_days |
+ | priority               |               | confidence_score         |
+ | is_workaround          |               | recommended_fix          |
+ | effort_hours           |               | priority_score           |
+ | status                 |               | cost_saved_usd           |
+ | true_cluster_id (FK)   |               +--------------------------+
+ +------------------------+
+</pre>
+            </div>
+        </div>
+
+        <!-- Tab 3: API Docs -->
+        <div class="tab-pane fade" id="apiTab">
+            <h5 class="fw-bold mb-3"><i class="bi bi-code-slash text-success me-2"></i> REST API Endpoints Overview</h5>
+            <ul class="list-group list-group-flush bg-dark rounded border border-secondary">
+                <li class="list-group-item bg-dark text-white border-secondary"><code>GET /api/dashboard</code> &mdash; Returns high-level metrics & trends</li>
+                <li class="list-group-item bg-dark text-white border-secondary"><code>GET /api/tickets</code> &mdash; Searchable & paginated ticket dataset</li>
+                <li class="list-group-item bg-dark text-white border-secondary"><code>POST /api/miner/cluster</code> &mdash; Executes KMeans or DBSCAN demand mining</li>
+                <li class="list-group-item bg-dark text-white border-secondary"><code>GET /api/benchmarks/run</code> &mdash; Runs model precision/recall/F1 benchmarks</li>
+                <li class="list-group-item bg-dark text-white border-secondary"><code>POST /api/edge-cases/simulate</code> &mdash; Triggers edge case resilience suite</li>
+                <li class="list-group-item bg-dark text-white border-secondary"><code>POST /api/workflow/toggle</code> &mdash; Switch between AI & Legacy workflows</li>
+                <li class="list-group-item bg-dark text-white border-secondary"><code>POST /api/workflow/rollback</code> &mdash; Zero-data-loss rollback to legacy</li>
+                <li class="list-group-item bg-dark text-white border-secondary"><code>GET /api/reports/download/&lt;type&gt;/&lt;format&gt;</code> &mdash; Exports PDF or CSV reports</li>
+            </ul>
+        </div>
+
+        <!-- Tab 4: User Manual -->
+        <div class="tab-pane fade" id="userTab">
+            <h5 class="fw-bold mb-3"><i class="bi bi-book text-amber me-2"></i> User & Service Manager Guide</h5>
+            <ol class="text-muted leading-relaxed">
+                <li><strong>Dashboard:</strong> Monitor live KPIs, resolution rates, and top recurring demand clusters.</li>
+                <li><strong>Ticket Management:</strong> Log new tickets, edit/delete records, or batch-import CSV files.</li>
+                <li><strong>Demand Miner:</strong> Adjust algorithm parameters (KMeans vs DBSCAN) and execute text clustering to uncover root cause clusters.</li>
+                <li><strong>Permanent Fixes:</strong> Review ranked Problem Management solutions with projected time and cost savings.</li>
+                <li><strong>Stakeholder Feedback:</strong> Submit Service Manager evaluations and track approval metrics.</li>
+            </ol>
+        </div>
+
+        <!-- Tab 5: Presentation Slides Deck -->
+        <div class="tab-pane fade" id="slidesTab">
+            <h5 class="fw-bold mb-3"><i class="bi bi-file-slides text-rose me-2"></i> Presentation Slides Artifact</h5>
+            
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="p-3 bg-dark rounded border border-secondary">
+                        <span class="badge bg-primary mb-2">Slide 1: Executive Overview</span>
+                        <h6 class="fw-bold text-white">Recurring Demand Miner Overview</h6>
+                        <p class="small text-muted mb-0">AI-Powered Problem Management for Enterprise Service Desks. Transforms reactive support into proactive demand reduction.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 bg-dark rounded border border-secondary">
+                        <span class="badge bg-success mb-2">Slide 2: Measurable ROI Impact</span>
+                        <h6 class="fw-bold text-white">34.2% Demand Reduction</h6>
+                        <p class="small text-muted mb-0">1,450+ Engineer Hours Saved / Year ($72,500+ cost savings at standard enterprise rate).</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 bg-dark rounded border border-secondary">
+                        <span class="badge bg-purple mb-2">Slide 3: ML Benchmarking</span>
+                        <h6 class="fw-bold text-white">93.1% Model Accuracy</h6>
+                        <p class="small text-muted mb-0">TF-IDF + KMeans achieves 92.4% F1 Score, outperforming Keyword Baseline by 28%.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 bg-dark rounded border border-secondary">
+                        <span class="badge bg-warning mb-2">Slide 4: Enterprise Readiness</span>
+                        <h6 class="fw-bold text-white">Coexistence & Rollback</h6>
+                        <p class="small text-muted mb-0">Graceful coexistence with legacy manual workflows and zero-data-loss rollback mechanism.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

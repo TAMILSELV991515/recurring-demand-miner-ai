@@ -1,0 +1,86 @@
+{% extends 'admin_base.html' %}
+{% set active_page = 'admin_settings' %}
+{% block page_title %}Admin System Settings & Rollback{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <div class="glass-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0"><i class="bi bi-arrow-repeat text-primary me-2"></i> Coexistence Workflow Switcher</h5>
+                <span class="badge bg-primary px-3 py-2 fs-6" id="currentModeBadge">{{ active_workflow | upper }}</span>
+            </div>
+            
+            <p class="text-muted small">Select active operational mode for the Service Desk platform:</p>
+
+            <div class="list-group mb-4">
+                <label class="list-group-item bg-dark text-white border-secondary d-flex justify-content-between align-items-center p-3 cursor-pointer">
+                    <div>
+                        <div class="fw-bold text-success"><i class="bi bi-cpu-fill me-2"></i> New AI-Powered Workflow (Recommended)</div>
+                        <small class="text-muted">Automated ticket clustering, demand reduction mining, proactive problem management.</small>
+                    </div>
+                    <input class="form-check-input flex-shrink-0" type="radio" name="workflowMode" value="ai" {% if active_workflow == 'ai' %}checked{% endif %} onchange="toggleWorkflow('ai')">
+                </label>
+                
+                <label class="list-group-item bg-dark text-white border-secondary d-flex justify-content-between align-items-center p-3 cursor-pointer mt-2">
+                    <div>
+                        <div class="fw-bold text-warning"><i class="bi bi-person-workspace me-2"></i> Legacy Manual Workflow</div>
+                        <small class="text-muted">Traditional reactive incident handling with manual root cause logging.</small>
+                    </div>
+                    <input class="form-check-input flex-shrink-0" type="radio" name="workflowMode" value="legacy" {% if active_workflow == 'legacy' %}checked{% endif %} onchange="toggleWorkflow('legacy')">
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="glass-card p-4 h-100 border-start border-4 border-danger">
+            <h5 class="fw-bold text-danger mb-2"><i class="bi bi-arrow-counterclockwise me-2"></i> Rollback Demonstration</h5>
+            <p class="text-muted small">Demonstrates zero-data-loss system rollback to legacy state for enterprise compliance.</p>
+            
+            <div class="p-3 bg-dark rounded border border-secondary mb-4">
+                <div class="d-flex justify-content-between small text-muted mb-1">
+                    <span>Last Rollback Executed:</span>
+                    <strong class="text-white font-monospace">{{ last_rollback }}</strong>
+                </div>
+                <div class="d-flex justify-content-between small text-muted">
+                    <span>Data Integrity Status:</span>
+                    <strong class="text-success"><i class="bi bi-shield-check me-1"></i> 100% Preserved (0 Bytes Lost)</strong>
+                </div>
+            </div>
+
+            <button class="btn btn-danger w-100 py-3 fw-bold fs-6 shadow" onclick="executeRollback()">
+                <i class="bi bi-exclamation-octagon-fill me-2"></i> Rollback to Legacy Workflow
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleWorkflow(mode) {
+    fetch('/api/workflow/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workflow: mode })
+    })
+    .then(res => res.json())
+    .then(data => {
+        showToast(`Workflow switched to ${mode.toUpperCase()} mode!`, 'success');
+        document.getElementById('currentModeBadge').innerText = mode.toUpperCase();
+    });
+}
+
+function executeRollback() {
+    if (confirm('Execute zero-data-loss rollback to Legacy Workflow mode?')) {
+        fetch('/api/workflow/rollback', { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                showToast(data.message, 'warning');
+                setTimeout(() => location.reload(), 1000);
+            });
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends 'user_base.html' %}
+{% set active_page = 'ai_suggestions' %}
+{% block title %}AI Troubleshooting Suggestions - User Portal{% endblock %}
+
+{% block content %}
+<div class="mb-4 text-center" style="max-width: 800px; margin: 0 auto;">
+    <h3 class="fw-bold text-white mb-2"><i class="bi bi-lightbulb text-warning me-2"></i> AI Automated Solutions & Guides</h3>
+    <p class="text-muted">Instant troubleshooting guides mined from historical IT root-cause resolutions.</p>
+</div>
+
+<div class="row g-4" style="max-width: 900px; margin: 0 auto;">
+    <div class="col-md-6">
+        <div class="glass-card p-4 h-100">
+            <div class="d-flex align-items-center mb-3">
+                <div class="kpi-icon icon-blue me-3"><i class="bi bi-laptop"></i></div>
+                <div>
+                    <h6 class="fw-bold text-white mb-0">Slow VDI / Desktop Session</h6>
+                    <small class="text-muted">Application & Remote Desktop</small>
+                </div>
+            </div>
+            <p class="small text-muted mb-3">VDI profile disk IOPS saturation is the top cause of slow login times during peak 9 AM hours.</p>
+            <div class="p-3 bg-dark rounded border border-secondary small text-muted">
+                <strong>Recommended Self-Fix:</strong> Clear local temp files (<code>%temp%</code>), log off VDI cleanly instead of disconnecting, and ensure local network latency is < 40ms.
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="glass-card p-4 h-100">
+            <div class="d-flex align-items-center mb-3">
+                <div class="kpi-icon icon-purple me-3"><i class="bi bi-shield-lock"></i></div>
+                <div>
+                    <h6 class="fw-bold text-white mb-0">Active Directory Password Lock</h6>
+                    <small class="text-muted">Access & Identity</small>
+                </div>
+            </div>
+            <p class="small text-muted mb-3">Expired mobile mail sync credentials often trigger repetitive AD account lockouts.</p>
+            <div class="p-3 bg-dark rounded border border-secondary small text-muted">
+                <strong>Recommended Self-Fix:</strong> Update Exchange mail password on mobile devices first before unlocking account on Okta portal.
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="glass-card p-4 h-100">
+            <div class="d-flex align-items-center mb-3">
+                <div class="kpi-icon icon-green me-3"><i class="bi bi-wifi"></i></div>
+                <div>
+                    <h6 class="fw-bold text-white mb-0">VPN Connection Dropping</h6>
+                    <small class="text-muted">Network Operations</small>
+                </div>
+            </div>
+            <p class="small text-muted mb-3">RADIUS authentication timeout occurs every 45 minutes on older GlobalProtect client builds.</p>
+            <div class="p-3 bg-dark rounded border border-secondary small text-muted">
+                <strong>Recommended Self-Fix:</strong> Upgrade GlobalProtect client to v5.3.1 from Software Center and click <strong>Refresh Connection</strong>.
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="glass-card p-4 h-100">
+            <div class="d-flex align-items-center mb-3">
+                <div class="kpi-icon icon-amber me-3"><i class="bi bi-envelope-x"></i></div>
+                <div>
+                    <h6 class="fw-bold text-white mb-0">Outlook Mailbox Full Warning</h6>
+                    <small class="text-muted">Application & Storage</small>
+                </div>
+            </div>
+            <p class="small text-muted mb-3">Mailboxes reaching 10GB reject incoming attachments over 10MB.</p>
+            <div class="p-3 bg-dark rounded border border-secondary small text-muted">
+                <strong>Recommended Self-Fix:</strong> Empty Deleted Items folder and run <em>Clean Up Mailbox &rarr; Archive Items older than 30 days</em>.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

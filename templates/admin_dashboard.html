@@ -1,0 +1,130 @@
+{% extends 'admin_base.html' %}
+{% set active_page = 'admin_dashboard' %}
+{% block page_title %}Admin Executive Dashboard{% endblock %}
+
+{% block content %}
+<!-- KPI Cards Row -->
+<div class="row g-4 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="glass-card p-3 d-flex align-items-center justify-content-between">
+            <div>
+                <div class="kpi-title">Total System Tickets</div>
+                <div class="kpi-value">{{ metrics.total_tickets }}</div>
+                <small class="text-muted"><i class="bi bi-ticket-perforated me-1"></i> Across All Channels</small>
+            </div>
+            <div class="kpi-icon icon-blue"><i class="bi bi-ticket-perforated"></i></div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="glass-card p-3 d-flex align-items-center justify-content-between">
+            <div>
+                <div class="kpi-title">Open / Closed</div>
+                <div class="kpi-value"><span class="text-warning">{{ metrics.open_tickets }}</span> / <span class="text-success">{{ metrics.closed_tickets }}</span></div>
+                <small class="text-muted"><i class="bi bi-check2-circle me-1"></i> {{ ((metrics.closed_tickets / metrics.total_tickets) * 100) | round(1) if metrics.total_tickets > 0 else 0 }}% Resolution</small>
+            </div>
+            <div class="kpi-icon icon-purple"><i class="bi bi-folder-check"></i></div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="glass-card p-3 d-flex align-items-center justify-content-between">
+            <div>
+                <div class="kpi-title">Mined Incident Clusters</div>
+                <div class="kpi-value text-info">{{ metrics.recurring_clusters_count }}</div>
+                <small class="text-muted"><i class="bi bi-diagram-3 me-1"></i> AI Identified</small>
+            </div>
+            <div class="kpi-icon icon-amber"><i class="bi bi-arrow-repeat"></i></div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="glass-card p-3 d-flex align-items-center justify-content-between">
+            <div>
+                <div class="kpi-title">Projected Cost Saved</div>
+                <div class="kpi-value text-success">${{ "{:,}".format(metrics.total_cost_saved_usd) }}</div>
+                <small class="text-muted"><i class="bi bi-currency-dollar me-1"></i> Labor Savings / Yr</small>
+            </div>
+            <div class="kpi-icon icon-green"><i class="bi bi-cash-stack"></i></div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="glass-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0"><i class="bi bi-graph-up text-primary me-2"></i> Monthly Support Demand & Volume Trend</h6>
+                <span class="badge bg-secondary-subtle text-secondary">2024 YTD</span>
+            </div>
+            <div style="height: 280px;">
+                <canvas id="monthlyTrendCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="glass-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0"><i class="bi bi-pie-chart text-purple me-2"></i> Ticket Intake Channels</h6>
+            </div>
+            <div style="height: 280px;">
+                <canvas id="channelCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Top Recurring Clusters Summary Table -->
+<div class="glass-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h6 class="fw-bold mb-0"><i class="bi bi-fire text-danger me-2"></i> High Priority Mined Clusters</h6>
+            <small class="text-muted">Top recurring issue patterns requiring permanent engineering intervention</small>
+        </div>
+        <a href="{{ url_for('admin_clusters') }}" class="btn btn-sm btn-primary rounded-pill px-3">
+            <i class="bi bi-cpu me-1"></i> Open Demand Miner
+        </a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-custom align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Cluster ID</th>
+                    <th>Issue Name</th>
+                    <th>Category</th>
+                    <th>Tickets</th>
+                    <th>Recurrence Interval</th>
+                    <th>Total Effort</th>
+                    <th>Confidence</th>
+                    <th>Recommended Fix</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in top_clusters %}
+                <tr>
+                    <td><span class="badge bg-dark border text-info font-monospace">{{ c.cluster_id }}</span></td>
+                    <td class="fw-semibold">{{ c.cluster_name }}</td>
+                    <td><span class="badge bg-secondary-subtle text-secondary">{{ c.category }}</span></td>
+                    <td><span class="fw-bold">{{ c.ticket_count }}</span></td>
+                    <td>{{ c.recurrence_interval_days }} days</td>
+                    <td>{{ c.total_effort_hours }} hrs</td>
+                    <td><span class="text-success font-monospace">{{ c.confidence_score }}%</span></td>
+                    <td><small class="text-truncate d-inline-block" style="max-width: 220px;">{{ c.recommended_fix }}</small></td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center py-4 text-muted">No clusters mined yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        renderMonthlyTrendChart('monthlyTrendCanvas', null, null);
+        renderChannelChart('channelCanvas', {{ channel_data | tojson if channel_data else '{}' }});
+    });
+</script>
+{% endblock %}

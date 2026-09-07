@@ -1,0 +1,45 @@
+{% extends 'user_base.html' %}
+{% set active_page = 'profile' %}
+{% block title %}My Profile - User Portal{% endblock %}
+
+{% block content %}
+<div class="glass-card p-4 mx-auto" style="max-width: 650px;">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <div class="kpi-icon icon-purple" style="width: 60px; height: 60px; font-size: 1.8rem;">
+            <i class="bi bi-person-fill"></i>
+        </div>
+        <div>
+            <h4 class="fw-bold text-white mb-0">{{ user.full_name }}</h4>
+            <small class="text-muted"><i class="bi bi-shield-check text-success me-1"></i> End User Account</small>
+        </div>
+    </div>
+
+    {% if message %}
+    <div class="alert alert-success border-success small mb-3">
+        <i class="bi bi-check-circle-fill me-1"></i> {{ message }}
+    </div>
+    {% endif %}
+
+    <form action="{{ url_for('user_profile') }}" method="POST">
+        <div class="mb-3">
+            <label class="form-label text-muted small fw-semibold">FULL NAME</label>
+            <input type="text" class="form-control bg-dark text-white border-secondary" name="full_name" value="{{ user.full_name }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label text-muted small fw-semibold">EMAIL ADDRESS</label>
+            <input type="email" class="form-control bg-dark text-white border-secondary" name="email" value="{{ user.email }}" readonly>
+            <small class="text-muted">Email address cannot be changed.</small>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label text-muted small fw-semibold">PHONE NUMBER</label>
+            <input type="text" class="form-control bg-dark text-white border-secondary" name="phone" value="{{ user.phone }}">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold shadow">
+            <i class="bi bi-save me-1"></i> Save Profile Changes
+        </button>
+    </form>
+</div>
+{% endblock %}

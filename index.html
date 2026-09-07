@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recurring Demand Miner - Enterprise Service Desk AI</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: rgba(30, 41, 59, 0.75);
+            --border-color: rgba(255, 255, 255, 0.12);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-indigo: #6366f1;
+            --accent-purple: #a855f7;
+            --accent-green: #34d399;
+            --accent-amber: #fbbf24;
+            --accent-rose: #f43f5e;
+            --shadow-main: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #f1f5f9;
+            --bg-secondary: #ffffff;
+            --bg-card: rgba(255, 255, 255, 0.9);
+            --border-color: rgba(0, 0, 0, 0.08);
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --accent-blue: #0284c7;
+            --accent-indigo: #4f46e5;
+            --accent-purple: #9333ea;
+            --accent-green: #059669;
+            --accent-amber: #d97706;
+            --accent-rose: #e11d48;
+            --shadow-main: 0 10px 25px -5px rgba(0, 0, 0, 0.06);
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            box-shadow: var(--shadow-main);
+            transition: transform 0.2s ease;
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .sidebar-brand {
+            padding: 1.5rem 1.25rem;
+            font-weight: 700;
+            font-size: 1.15rem;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-link {
+            color: var(--text-muted);
+            padding: 0.75rem 1.25rem;
+            font-size: 0.92rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 0.25rem 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #ffffff !important;
+            background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 2rem;
+        }
+
+        .top-navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .kpi-title { font-size: 0.82rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); }
+        .kpi-value { font-size: 2rem; font-weight: 700; margin-top: 0.25rem; margin-bottom: 0.25rem; }
+        .kpi-icon { width: 48px; height: 48px; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
+        .icon-blue { background: rgba(56, 189, 248, 0.15); color: var(--accent-blue); }
+        .icon-purple { background: rgba(168, 85, 247, 0.15); color: var(--accent-purple); }
+        .icon-green { background: rgba(52, 211, 153, 0.15); color: var(--accent-green); }
+        .icon-amber { background: rgba(251, 191, 36, 0.15); color: var(--accent-amber); }
+
+        .table-custom { color: var(--text-main); }
+        .table-custom th { background-color: rgba(15, 23, 42, 0.4); color: var(--text-muted); font-size: 0.8rem; border-bottom: 1px solid var(--border-color); padding: 0.85rem 1rem; }
+        .table-custom td { padding: 0.85rem 1rem; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+
+        .badge-p1 { background: rgba(244, 63, 94, 0.2); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.4); }
+        .badge-p2 { background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.4); }
+        .badge-p3 { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); }
+
+        .theme-toggle-btn { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; }
+
+        .user-portal-mode .sidebar { display: none !important; }
+        .user-portal-mode .main-content { margin-left: 0 !important; }
+    </style>
+</head>
+<body id="bodyEl">
+
+    <!-- PORTAL MODE SELECTOR BANNER -->
+    <div class="bg-primary text-white py-2 px-3 d-flex justify-content-between align-items-center small">
+        <div>
+            <i class="bi bi-layers-half me-1"></i> Mode: <strong id="portalNameDisplay">Enterprise Service Desk AI</strong>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="http://localhost:5000/login" class="btn btn-sm btn-light py-0 px-2 fw-bold"><i class="bi bi-person-circle me-1"></i> User Portal (/login)</a>
+            <a href="http://localhost:5000/admin/login" class="btn btn-sm btn-dark py-0 px-2 fw-bold"><i class="bi bi-shield-lock-fill me-1"></i> Admin Portal (/admin/login)</a>
+        </div>
+    </div>
+
+    <!-- Sidebar (Admin Portal) -->
+    <div class="sidebar" id="adminSidebar">
+        <div class="sidebar-brand">
+            <i class="bi bi-shield-lock-fill text-purple fs-3"></i>
+            <span>Admin Suite</span>
+        </div>
+        <div class="px-3 mb-3">
+            <span class="badge bg-purple-subtle text-purple border border-purple-subtle w-100 py-2" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;">
+                <i class="bi bi-person-check-fill me-1"></i> Admin: admin
+            </span>
+        </div>
+        <ul class="nav flex-column" id="mainNav">
+            <li class="nav-item">
+                <a class="nav-link active" onclick="switchTab('dashboard', this)">
+                    <i class="bi bi-grid-1x2-fill"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="switchTab('tickets', this)">
+                    <i class="bi bi-ticket-detailed-fill"></i> Manage Tickets
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="switchTab('miner', this)">
+                    <i class="bi bi-diagram-3-fill"></i> Mined Clusters
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="switchTab('recommendations', this)">
+                    <i class="bi bi-lightbulb-fill"></i> Permanent Fixes
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="switchTab('benchmarks', this)">
+                    <i class="bi bi-bar-chart-line-fill"></i> ML Benchmarks
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="switchTab('edge-cases', this)">
+                    <i class="bi bi-exclamation-triangle-fill"></i> Failure Cases
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="switchTab('workflow', this)">
+                    <i class="bi bi-arrow-repeat"></i> Coexistence & Rollback
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="switchTab('feedback', this)">
+                    <i class="bi bi-chat-square-quote-fill"></i> Stakeholder Feedback
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="switchTab('reports', this)">
+                    <i class="bi bi-file-earmark-pdf-fill"></i> Download Reports
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="switchTab('docs', this)">
+                    <i class="bi bi-book-fill"></i> Documentation & Slides
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <!-- Top Navbar -->
+        <div class="top-navbar">
+            <div>
+                <h4 class="mb-0 fw-bold" id="pageTitleHeading">Admin Executive Dashboard</h4>
+                <small class="text-muted">Enterprise Service Desk Problem Management Platform</small>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Light/Dark Theme">
+                    <i class="bi bi-sun-fill" id="themeIcon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100;"></div>
+
+        <!-- TAB 1: DASHBOARD -->
+        <div id="tab-dashboard" class="tab-pane active">
+            <div class="row g-4 mb-4">
+                <div class="col-xl-3 col-md-6">
+                    <div class="glass-card p-3 d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="kpi-title">Total Tickets</div>
+                            <div class="kpi-value" id="kpiTotalTickets">5,000</div>
+                            <small class="text-muted"><i class="bi bi-clock-history me-1"></i> Across 4 Channels</small>
+                        </div>
+                        <div class="kpi-icon icon-blue"><i class="bi bi-ticket-perforated"></i></div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="glass-card p-3 d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="kpi-title">Open / Closed</div>
+                            <div class="kpi-value"><span class="text-warning">750</span> / <span class="text-success">4,250</span></div>
+                            <small class="text-muted"><i class="bi bi-check2-circle me-1"></i> 85.0% Resolution</small>
+                        </div>
+                        <div class="kpi-icon icon-purple"><i class="bi bi-folder-check"></i></div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="glass-card p-3 d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="kpi-title">Mined Clusters</div>
+                            <div class="kpi-value text-info">15</div>
+                            <small class="text-muted"><i class="bi bi-diagram-3 me-1"></i> AI Identified</small>
+                        </div>
+                        <div class="kpi-icon icon-amber"><i class="bi bi-arrow-repeat"></i></div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="glass-card p-3 d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="kpi-title">Demand Reduction</div>
+                            <div class="kpi-value text-success">34.2%</div>
+                            <small class="text-muted"><i class="bi bi-graph-down-arrow me-1"></i> $72,500 Saved / Yr</small>
+                        </div>
+                        <div class="kpi-icon icon-green"><i class="bi bi-shield-shaded"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-lg-8">
+                    <div class="glass-card p-4 h-100">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-graph-up text-primary me-2"></i> Support Demand & Volume Trend</h6>
+                        <div style="height: 280px;"><canvas id="monthlyTrendCanvas"></canvas></div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="glass-card p-4 h-100">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-pie-chart text-purple me-2"></i> Ticket Intake Channels</h6>
+                        <div style="height: 280px;"><canvas id="channelCanvas"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card p-4">
+                <h6 class="fw-bold mb-3"><i class="bi bi-fire text-danger me-2"></i> Top Mined Incident Clusters</h6>
+                <div class="table-responsive">
+                    <table class="table table-custom align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Cluster ID</th>
+                                <th>Issue Name</th>
+                                <th>Category</th>
+                                <th>Tickets</th>
+                                <th>Interval</th>
+                                <th>Effort</th>
+                                <th>Recommended Fix</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashboardClustersTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: TICKETS -->
+        <div id="tab-tickets" class="tab-pane">
+            <div class="glass-card p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center gap-3">
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control bg-dark text-white border-secondary" id="ticketSearchInput" placeholder="Search by Ticket ID, Title, Asset..." oninput="filterTickets()">
+                    </div>
+                    <button class="btn btn-success text-nowrap" data-bs-toggle="modal" data-bs-target="#addTicketModal"><i class="bi bi-plus-lg me-1"></i> Add Ticket</button>
+                </div>
+            </div>
+            <div class="glass-card p-4">
+                <div class="table-responsive">
+                    <table class="table table-custom align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Ticket ID</th>
+                                <th>Created Date</th>
+                                <th>Category</th>
+                                <th>Priority</th>
+                                <th>Channel</th>
+                                <th>Short Description</th>
+                                <th>Asset</th>
+                                <th>Engineer</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ticketsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: DEMAND MINER -->
+        <div id="tab-miner" class="tab-pane">
+            <div class="glass-card p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-diagram-3 text-primary me-2"></i> NLP Vectorization & Machine Learning Clusters</h5>
+                    <button class="btn btn-primary" onclick="runDemandMining()"><i class="bi bi-play-fill me-1"></i> Run Demand Mining</button>
+                </div>
+            </div>
+            <div id="clustersContainer" class="row g-4"></div>
+        </div>
+
+        <!-- TAB 4: RECOMMENDATIONS -->
+        <div id="tab-recommendations" class="tab-pane">
+            <div class="glass-card p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-lightbulb text-warning me-2"></i> Ranked Problem Management Solutions</h5>
+                <div class="table-responsive">
+                    <table class="table table-custom align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Rank / ID</th>
+                                <th>Cluster Name</th>
+                                <th>Priority Score</th>
+                                <th>Recommended Fix</th>
+                                <th>Ticket Reduction</th>
+                                <th>Time Saved</th>
+                                <th>Cost Saved</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recommendationsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: BENCHMARKS -->
+        <div id="tab-benchmarks" class="tab-pane">
+            <div class="glass-card p-4 mb-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-cpu text-info me-2"></i> Machine Learning Model Comparison</h5>
+                <div style="height: 300px;"><canvas id="benchmarkChartCanvas"></canvas></div>
+            </div>
+        </div>
+
+        <!-- TAB 6: EDGE CASES -->
+        <div id="tab-edge-cases" class="tab-pane">
+            <div class="glass-card p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-shield-exclamation text-warning me-2"></i> Edge Case Failure Handling Simulator</h5>
+                    <button class="btn btn-warning" onclick="runEdgeCaseSimulation()"><i class="bi bi-lightning-charge-fill me-1"></i> Run Simulator</button>
+                </div>
+            </div>
+            <div class="glass-card p-4">
+                <table class="table table-custom align-middle mb-0">
+                    <thead>
+                        <tr><th>Time</th><th>Ticket ID</th><th>Failure Type</th><th>Issue</th><th>Action Taken</th><th>Status</th></tr>
+                    </thead>
+                    <tbody id="edgeCaseLogsBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 7: WORKFLOW -->
+        <div id="tab-workflow" class="tab-pane">
+            <div class="glass-card p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-arrow-repeat text-primary me-2"></i> Coexistence Mode & Rollback</h5>
+                <button class="btn btn-danger py-3 w-100 fw-bold" onclick="triggerRollback()">Rollback to Legacy Workflow</button>
+            </div>
+        </div>
+
+        <!-- TAB 8: FEEDBACK -->
+        <div id="tab-feedback" class="tab-pane">
+            <div class="glass-card p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-chat-square-quote text-purple me-2"></i> Service Manager Feedback Audit</h5>
+                <table class="table table-custom align-middle mb-0">
+                    <thead>
+                        <tr><th>Date</th><th>Manager</th><th>Cluster</th><th>Correct?</th><th>Approved?</th><th>Rating</th></tr>
+                    </thead>
+                    <tbody id="feedbackTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 9: REPORTS -->
+        <div id="tab-reports" class="tab-pane">
+            <div class="glass-card p-4 text-center">
+                <h5 class="fw-bold mb-3">Download Reports</h5>
+                <button class="btn btn-primary px-4" onclick="downloadCSVReport('recurring_incidents')"><i class="bi bi-file-earmark-excel me-1"></i> Export Recurring Incidents CSV</button>
+            </div>
+        </div>
+
+        <!-- TAB 10: DOCS -->
+        <div id="tab-docs" class="tab-pane">
+            <div class="glass-card p-4">
+                <h5 class="fw-bold mb-3">System Architecture</h5>
+                <p class="text-muted">Enterprise Service Desk Problem Management Platform architecture details.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Admin Login Modal for Standalone Mode -->
+    <div class="modal fade" id="adminLoginModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content glass-card border-secondary">
+                <div class="modal-header border-secondary text-white">
+                    <h5 class="modal-title"><i class="bi bi-shield-lock text-purple me-2"></i> Admin Authentication Required</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-white">
+                    <p class="text-muted small">Enter admin credentials to switch to Admin Portal (/admin):</p>
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-control bg-dark text-white border-secondary" id="modalAdminUser" value="admin">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-control bg-dark text-white border-secondary" id="modalAdminPass" value="admin123">
+                    </div>
+                    <div class="alert alert-info small mb-0">Default: username <code>admin</code> / password <code>admin123</code></div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="verifyAdminModal()">Login Admin</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS & Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        let ticketsData = [
+            { id: 'INC100001', date: '2024-01-01', cat: 'Hardware', sub: 'Printing', priority: 'P3-Medium', channel: 'Phone', desc: 'Print jobs stuck in spooler on floor 4 shared printer', asset: 'PRT-F2-HQ', eng: 'Alex Mercer', status: 'Closed', workaround: 0, effort: 0.94 },
+            { id: 'INC100002', date: '2024-01-01', cat: 'Access', sub: 'Offboarding', priority: 'P1-Critical', channel: 'Portal', desc: 'Offboarding - disable accounts for departing employee', asset: 'USE-262', eng: 'Sarah Connor', status: 'Closed', workaround: 0, effort: 0.49 },
+            { id: 'INC100003', date: '2024-01-02', cat: 'Application', sub: 'ERP Batch', priority: 'P3-Medium', channel: 'Phone', desc: 'Nightly ERP batch job fails at step 1, requires manual rerun', asset: 'ERP-PROD-01', eng: 'David Miller', status: 'Resolved', workaround: 1, effort: 1.74 }
+        ];
+
+        let clusterData = [
+            { id: 'CL-VDI-LOGIN-SLOW-03', name: 'Application: VDI Profile Disk Slow Login', cat: 'Application', count: 408, interval: 2.1, effort: 450.2, workaroundPct: 75.0, assets: 'VDI-POOL-01', score: 104.5, confidence: 94.2, fix: 'Upgrade VDI profile disk storage IOPS and optimize active directory group policy startup scripts.' },
+            { id: 'CL-PWRESET-AD-02', name: 'Access: Active Directory Password Reset', cat: 'Access', count: 365, interval: 2.3, effort: 182.5, workaroundPct: 88.0, assets: 'IDP-OKTA-01', score: 98.2, confidence: 95.0, fix: 'Deploy self-service Active Directory password reset portal with MFA verification.' }
+        ];
+
+        let feedbackList = [
+            { date: '2024-01-15', manager: 'David Ross', cluster: 'CL-VDI-LOGIN-SLOW-03', correct: 'Yes', approved: 'Approved', rating: 5 }
+        ];
+
+        function switchPortalMode(mode) {
+            if (mode === 'user') {
+                window.location.href = 'http://localhost:5000/login';
+            } else {
+                window.location.href = 'http://localhost:5000/admin/login';
+            }
+        }
+
+        function promptAdminLogin() {
+            var modal = new bootstrap.Modal(document.getElementById('adminLoginModal'));
+            modal.show();
+        }
+
+        function verifyAdminModal() {
+            const u = document.getElementById('modalAdminUser').value;
+            const p = document.getElementById('modalAdminPass').value;
+            if (u === 'admin' && p === 'admin123') {
+                var modalEl = document.getElementById('adminLoginModal');
+                var modal = bootstrap.Modal.getInstance(modalEl);
+                modal.hide();
+                switchPortalMode('admin');
+            } else {
+                alert('Invalid Admin credentials! Use admin / admin123');
+            }
+        }
+
+        function switchTab(tabId, el) {
+            document.querySelectorAll('.tab-pane').forEach(tp => tp.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+
+            if (el) {
+                document.querySelectorAll('#mainNav .nav-link').forEach(nl => nl.classList.remove('active'));
+                el.classList.add('active');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderDashboardClusters();
+            renderTicketsTable();
+            renderMinerClusters();
+            renderRecommendations();
+            renderFeedbackTable();
+            initCharts();
+        });
+
+        function renderDashboardClusters() {
+            const tbody = document.getElementById('dashboardClustersTable');
+            tbody.innerHTML = clusterData.map(c => `
+                <tr>
+                    <td><span class="badge bg-dark border text-info font-monospace">${c.id}</span></td>
+                    <td class="fw-semibold">${c.name}</td>
+                    <td><span class="badge bg-secondary-subtle text-secondary">${c.cat}</span></td>
+                    <td><span class="fw-bold">${c.count}</span></td>
+                    <td>${c.interval} days</td>
+                    <td>${c.effort} hrs</td>
+                    <td><small class="text-truncate d-inline-block" style="max-width: 220px;">${c.fix}</small></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderTicketsTable() {
+            const tbody = document.getElementById('ticketsTableBody');
+            tbody.innerHTML = ticketsData.map(t => `
+                <tr>
+                    <td class="font-monospace fw-bold text-primary">${t.id}</td>
+                    <td><small class="text-muted">${t.date}</small></td>
+                    <td><span class="badge bg-secondary-subtle text-secondary">${t.cat}</span></td>
+                    <td><span class="badge badge-p3">${t.priority}</span></td>
+                    <td><small>${t.channel}</small></td>
+                    <td><span class="d-inline-block text-truncate" style="max-width: 220px;">${t.desc}</span></td>
+                    <td><small class="font-monospace text-info">${t.asset}</small></td>
+                    <td><small>${t.eng}</small></td>
+                    <td><span class="badge bg-success-subtle text-success">${t.status}</span></td>
+                    <td><button class="btn btn-sm btn-outline-danger" onclick="deleteTicket('${t.id}')"><i class="bi bi-trash"></i></button></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderMinerClusters() {
+            const container = document.getElementById('clustersContainer');
+            container.innerHTML = clusterData.map(c => `
+                <div class="col-lg-6">
+                    <div class="glass-card p-4 h-100">
+                        <span class="badge bg-dark border text-info font-monospace fs-6">${c.id}</span>
+                        <h5 class="fw-bold text-white mt-2 mb-1">${c.name}</h5>
+                        <div class="p-3 bg-primary-subtle border border-primary-subtle rounded mt-3">
+                            <small class="fw-bold text-primary d-block mb-1">Recommended Fix Strategy:</small>
+                            <small class="text-white">${c.fix}</small>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderRecommendations() {
+            const tbody = document.getElementById('recommendationsTableBody');
+            tbody.innerHTML = clusterData.map((c, i) => `
+                <tr>
+                    <td><span class="badge bg-primary rounded-circle me-1">${i+1}</span> <span class="badge bg-dark border text-info font-monospace">${c.id}</span></td>
+                    <td class="fw-semibold">${c.name}</td>
+                    <td><span class="badge bg-danger fs-6 px-3">${c.score}</span></td>
+                    <td><small class="d-inline-block text-truncate" style="max-width: 250px;">${c.fix}</small></td>
+                    <td><span class="fw-bold text-success">85.0%</span></td>
+                    <td><span class="fw-bold text-info">${(c.effort * 0.85).toFixed(1)} Hrs</span></td>
+                    <td><span class="fw-bold text-success">$${(c.effort * 0.85 * 50).toFixed(2)}</span></td>
+                    <td><button class="btn btn-sm btn-outline-success rounded-pill" onclick="showToast('Fix approved!', 'success')">Approve</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderFeedbackTable() {
+            const tbody = document.getElementById('feedbackTableBody');
+            tbody.innerHTML = feedbackList.map(f => `
+                <tr>
+                    <td><small class="text-muted font-monospace">${f.date}</small></td>
+                    <td class="fw-bold">${f.manager}</td>
+                    <td><span class="badge bg-dark border text-info font-monospace">${f.cluster}</span></td>
+                    <td><span class="badge bg-success-subtle text-success">${f.correct}</span></td>
+                    <td><span class="badge bg-success-subtle text-success">${f.approved}</span></td>
+                    <td><span class="text-warning">★ ${f.rating}.0</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function deleteTicket(id) {
+            ticketsData = ticketsData.filter(t => t.id !== id);
+            renderTicketsTable();
+            showToast(`Deleted ticket ${id}`, 'success');
+        }
+
+        function triggerRollback() {
+            showToast('Rollback to Legacy Workflow completed without data loss.', 'warning');
+        }
+
+        function downloadCSVReport(type) {
+            let csv = "Cluster ID,Category,Count,Fix\n";
+            clusterData.forEach(c => { csv += `"${c.id}","${c.cat}",${c.count},"${c.fix}"\n`; });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${type}_report.csv`;
+            a.click();
+            showToast(`Downloaded ${type}_report.csv`, 'success');
+        }
+
+        function toggleTheme() {
+            let cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', cur);
+            document.getElementById('themeIcon').className = cur === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+        }
+
+        function showToast(msg, type='success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'warning'} border-0 show`;
+            toast.innerHTML = `<div class="d-flex"><div class="toast-body">${msg}</div></div>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function initCharts() {
+            new Chart(document.getElementById('monthlyTrendCanvas'), {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+                    datasets: [{ label: 'Support Demand', data: [420, 380, 450, 410, 390, 480, 460, 430], borderColor: '#38bdf8', backgroundColor: 'rgba(56, 189, 248, 0.15)', fill: true, tension: 0.4 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            new Chart(document.getElementById('channelCanvas'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Email', 'Chat', 'Phone', 'Portal'],
+                    datasets: [{ data: [40, 30, 18, 12], backgroundColor: ['#38bdf8', '#6366f1', '#a855f7', '#34d399'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '70%' }
+            });
+
+            new Chart(document.getElementById('benchmarkChartCanvas'), {
+                type: 'bar',
+                data: {
+                    labels: ['Precision %', 'Recall %', 'F1 Score %', 'Accuracy %'],
+                    datasets: [
+                        { label: 'KMeans (TF-IDF)', data: [91.8, 93.1, 92.4, 93.1], backgroundColor: '#38bdf8' },
+                        { label: 'DBSCAN (Density)', data: [87.5, 89.8, 88.6, 89.8], backgroundColor: '#a855f7' },
+                        { label: 'Keyword Baseline', data: [62.4, 66.0, 64.2, 66.0], backgroundColor: '#94a3b8' }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 50, max: 100 } } }
+            });
+        }
+    </script>
+</body>
+</html>

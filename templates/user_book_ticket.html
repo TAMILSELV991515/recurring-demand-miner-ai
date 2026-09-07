@@ -1,0 +1,55 @@
+{% extends 'user_base.html' %}
+{% set active_page = 'book_ticket' %}
+{% block title %}Book New Ticket - User Portal{% endblock %}
+
+{% block content %}
+<div class="glass-card p-4 mx-auto" style="max-width: 750px;">
+    <h4 class="fw-bold text-white mb-2"><i class="bi bi-plus-circle text-primary me-2"></i> Book IT Support Ticket</h4>
+    <p class="text-muted small mb-4">Submit your incident details below for immediate IT support routing.</p>
+
+    <form action="{{ url_for('user_book_ticket') }}" method="POST">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Category</label>
+                <select class="form-select bg-dark text-white border-secondary" name="category" required>
+                    <option value="Application">Application</option>
+                    <option value="Hardware">Hardware</option>
+                    <option value="Access">Access / Account</option>
+                    <option value="Network">Network / VPN</option>
+                    <option value="Server">Server</option>
+                    <option value="Facilities">Facilities</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Priority Level</label>
+                <select class="form-select bg-dark text-white border-secondary" name="priority">
+                    <option value="P3-Medium">P3 - Medium (Normal Request)</option>
+                    <option value="P2-High">P2 - High (Significant Friction)</option>
+                    <option value="P1-Critical">P1 - Critical (Work Blocked)</option>
+                    <option value="P4-Low">P4 - Low (Minor Question)</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Intake Channel</label>
+                <select class="form-select bg-dark text-white border-secondary" name="channel">
+                    <option value="Portal">Portal</option>
+                    <option value="Email">Email</option>
+                    <option value="Chat">Chat</option>
+                    <option value="Phone">Phone</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Affected Asset Tag / Hostname</label>
+                <input type="text" class="form-control bg-dark text-white border-secondary" name="affected_asset" placeholder="e.g. EUC-DESK-102 or PRT-01" required>
+            </div>
+            <div class="col-12">
+                <label class="form-label">Summary Description</label>
+                <textarea class="form-control bg-dark text-white border-secondary" name="short_description" rows="4" placeholder="Provide clear details on what issue you are facing..." required></textarea>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold shadow"><i class="bi bi-send-fill me-2"></i> Submit & Book Ticket</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
