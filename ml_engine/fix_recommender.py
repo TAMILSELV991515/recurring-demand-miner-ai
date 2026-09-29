@@ -2,9 +2,22 @@ import numpy as np
 from datetime import datetime
 from collections import Counter
 from .preprocessor import clean_text
-from .vectorizer import TextVectorizer, compute_cosine_similarity
-from .clusterer import KMeansClusterer, DBSCANClusterer, extract_cluster_name
+from .vectorizer import TextVectorizer, DenseEmbedder, compute_cosine_similarity
+from .clusterer import KMeansClusterer, DBSCANClusterer, HDBSCANClusterer, AgglomerativeClusterer, extract_cluster_name
 
+"""
+ml_engine/fix_recommender.py
+============================
+Problem Management Fix Recommendation & ROI Prioritization Engine.
+
+Calculates the Recurring Demand Prioritization Score ($S_{priority}$):
+$$S_{priority} = (0.4 * N_{tickets}) + (0.3 * P_{workaround}) + (0.3 * E_{total}) + I_{impact}$$
+
+Computes recurrence intervals, intra-cluster cohesion confidence scores,
+expected ticket reduction %, total time saved (hours), and potential cost saved ($).
+"""
+
+# Permanent Problem Management resolution templates mapped by IT category
 RECOMMENDED_FIX_TEMPLATES = {
     'Hardware': "Deploy updated device drivers, configure hardware auto-health monitoring, and initiate proactive battery/hardware replacement for flagged asset serial numbers.",
     'Application': "Apply database index optimization, deploy bug patch v4.2, increase request connection timeout, and establish automated retry/archive background routines.",
@@ -16,21 +29,44 @@ RECOMMENDED_FIX_TEMPLATES = {
 
 def analyze_and_rank_clusters(tickets, algorithm='KMeans', n_clusters=8, eps=0.4):
     """
-    Runs text vectorization, clustering, metrics calculation, and permanent fix recommendation.
-    Returns ranked list of cluster summaries.
+    Executes text vectorization, machine learning clustering, recurrence analysis,
+    and priority ranking ($S_{priority}$) for IT support tickets.
+
+    Args:
+        tickets (list of dict): Ingested support ticket records.
+        algorithm (str): ML algorithm choice ('KMeans', 'DBSCAN', 'HDBSCAN', 'Agglomerative', 'SentenceTransformers').
+        n_clusters (int): Target cluster count for partitioning algorithms.
+        eps (float): Epsilon distance parameter for DBSCAN density clustering.
+
+    Returns:
+        list of dict: Ranked list of cluster objects sorted descending by priority_score.
     """
     if not tickets:
         return []
     
     cleaned_texts = [clean_text(t['short_description']) for t in tickets]
-    vectorizer = TextVectorizer(max_features=1000)
-    matrix = vectorizer.fit_transform(cleaned_texts)
     
+    if algorithm in ['SentenceTransformers', 'Sentence-Transformers', 'SBERT']:
+        vectorizer = DenseEmbedder()
+        matrix = vectorizer.fit_transform(cleaned_texts)
+        feature_names = []
+    else:
+        vectorizer = TextVectorizer(max_features=1000)
+        matrix = vectorizer.fit_transform(cleaned_texts)
+        feature_names = vectorizer.feature_names
+        
     if matrix.shape[0] == 0:
         return []
     
+    # Model Selection & Cluster Execution
     if algorithm == 'DBSCAN':
         clusterer = DBSCANClusterer(eps=eps, min_samples=3)
+        labels = clusterer.fit_predict(matrix)
+    elif algorithm == 'HDBSCAN':
+        clusterer = HDBSCANClusterer(min_cluster_size=3, min_samples=2)
+        labels = clusterer.fit_predict(matrix)
+    elif algorithm in ['Agglomerative', 'Hierarchical']:
+        clusterer = AgglomerativeClusterer(n_clusters=n_clusters)
         labels = clusterer.fit_predict(matrix)
     else:
         clusterer = KMeansClusterer(n_clusters=n_clusters)
@@ -41,7 +77,7 @@ def analyze_and_rank_clusters(tickets, algorithm='KMeans', n_clusters=8, eps=0.4
     # Group tickets by assigned cluster label
     clusters_map = {}
     for idx, label in enumerate(labels):
-        if label == -1: # Ignore unclustered noise in DBSCAN
+        if label == -1: # Ignore unclustered noise in DBSCAN/HDBSCAN
             continue
         if label not in clusters_map:
             clusters_map[label] = []
@@ -50,15 +86,15 @@ def analyze_and_rank_clusters(tickets, algorithm='KMeans', n_clusters=8, eps=0.4
     results = []
     
     for label, indices in clusters_map.items():
-        if len(indices) < 2: # Exclude tiny single-ticket noise clusters
+        if len(indices) < 2: # Exclude single-ticket noise clusters
             continue
             
         cluster_tickets = [tickets[i] for i in indices]
         cluster_texts = [cleaned_texts[i] for i in indices]
         
-        # Calculate cluster properties
+        # Calculate cluster category & top phrase label
         category = Counter([t['category'] for t in cluster_tickets]).most_common(1)[0][0]
-        issue_name = extract_cluster_name(cluster_texts, feature_names=vectorizer.feature_names)
+        issue_name = extract_cluster_name(cluster_texts, feature_names=feature_names)
         
         ticket_count = len(cluster_tickets)
         total_effort = sum(t['effort_hours'] for t in cluster_tickets)
@@ -70,7 +106,7 @@ def analyze_and_rank_clusters(tickets, algorithm='KMeans', n_clusters=8, eps=0.4
         affected_assets = list(set([t['affected_asset'] for t in cluster_tickets if t['affected_asset'] != 'N/A']))
         affected_assets_str = ", ".join(affected_assets[:4]) if affected_assets else "Fleet / Multiple"
         
-        # Calculate Recurrence Interval (average delta days between consecutive created dates)
+        # Recurrence Interval Calculation (average delta days between consecutive created dates)
         dates = []
         for t in cluster_tickets:
             try:
@@ -93,7 +129,7 @@ def analyze_and_rank_clusters(tickets, algorithm='KMeans', n_clusters=8, eps=0.4
         sub_sim = sim_matrix[np.ix_(indices, indices)]
         confidence_score = round(float(np.mean(sub_sim)) * 100, 1)
         
-        # Business Impact assessment
+        # Business Impact assessment & scalar weight selection
         if ticket_count >= 15 or total_effort >= 20:
             business_impact = "CRITICAL - High Support Consumption"
             impact_weight = 30
@@ -104,10 +140,10 @@ def analyze_and_rank_clusters(tickets, algorithm='KMeans', n_clusters=8, eps=0.4
             business_impact = "MEDIUM - Recurring End-User Nuisance"
             impact_weight = 10
             
-        # Recommendation & ROI Metrics
+        # Permanent Fix Recommendation & ROI Calculations
         recommended_fix = RECOMMENDED_FIX_TEMPLATES.get(category, RECOMMENDED_FIX_TEMPLATES['Application'])
         
-        # Formula for priority score
+        # Mathematical Prioritization Formula (S_priority)
         priority_score = round((ticket_count * 0.4) + (workaround_pct * 0.3) + (total_effort * 0.3) + impact_weight, 1)
         
         expected_reduction_pct = 85.0 if workaround_pct > 50 else 75.0

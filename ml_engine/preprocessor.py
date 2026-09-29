@@ -1,5 +1,17 @@
 import re
 
+"""
+ml_engine/preprocessor.py
+=========================
+Text Preprocessing and RegEx Cleaning Module for Enterprise Service Desk Tickets.
+
+This module normalizes raw ticket titles and short descriptions submitted across
+multiple intake channels (Email, Chat, Phone, and Web Portal) into clean token sequences.
+It applies case normalization, strips URLs/email noise, removes non-alphanumeric symbols,
+and filters out generic IT support domain stop-words.
+"""
+
+# Custom set of domain-specific IT support stop-words alongside standard English stop-words
 STOP_WORDS = set([
     'a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and', 'any', 'are', 'aren\'t', 'as', 'at',
     'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by', 'can', 'can\'t', 'cannot',
@@ -14,26 +26,36 @@ STOP_WORDS = set([
     'this', 'those', 'through', 'to', 'too', 'under', 'until', 'up', 'very', 'was', 'wasn\'t', 'we', 'we\'d', 'we\'ll',
     'we\'re', 'we\'ve', 'were', 'weren\'t', 'what', 'what\'s', 'when', 'when\'s', 'where', 'where\'s', 'which', 'while',
     'who', 'who\'s', 'whom', 'why', 'why\'s', 'with', 'won\'t', 'would', 'wouldn\'t', 'you', 'you\'d', 'you\'ll',
-    'you\'re', 'you\'ve', 'your', 'yours', 'yourself', 'yourselves', 'issue', 'ticket', 'problem', 'user', 'please', 'help', 'request'
+    'you\'re', 'you\'ve', 'your', 'yours', 'yourself', 'yourselves', 
+    'issue', 'ticket', 'problem', 'user', 'please', 'help', 'request', 'hi', 'hello', 'thanks', 'regards'
 ])
 
 def clean_text(text):
+    """
+    Cleans and normalizes unstructured ticket text.
+
+    Args:
+        text (str): Raw input text string from ticket description or title.
+
+    Returns:
+        str: Space-separated normalized token string suitable for vectorization.
+    """
     if not text or not isinstance(text, str):
         return ""
     
-    # 1. Lowercase
+    # Step 1: Case Normalization
     text = text.lower()
     
-    # 2. Remove URLs and Email addresses
+    # Step 2: Remove URLs and Email addresses
     text = re.sub(r'http\S+|www\S+|\S+@\S+', '', text)
     
-    # 3. Remove non-alphanumeric characters except basic spaces
+    # Step 3: Remove non-alphanumeric characters except basic spaces
     text = re.sub(r'[^a-z0-9\s]', ' ', text)
     
-    # 4. Remove standalone digits
+    # Step 4: Remove standalone numeric sequences
     text = re.sub(r'\b\d+\b', '', text)
     
-    # 5. Remove stop words & single character words
+    # Step 5: Filter stop-words and single-letter characters
     tokens = [w for w in text.split() if w not in STOP_WORDS and len(w) > 1]
     
     return " ".join(tokens)
